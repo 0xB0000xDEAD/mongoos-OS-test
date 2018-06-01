@@ -1,0 +1,52 @@
+author: mongoose-os
+description: A JS-enabled demo Mongoose OS firmware
+# arch: PLATFORM
+version: 1.0
+manifest_version: 2017-05-18
+libs_version: ${mos.version}
+modules_version: ${mos.version}
+mongoose_os_version: ${mos.version}
+
+config_schema:
+  - ["mqtt.server", "iot.eclipse.org:1883"]
+  - ["i2c.enable", true]
+  - ["i2c.freq", 400000]
+  - ["i2c.sda_gpio", 5]
+  - ["i2c.scl_gpio", 4]
+#  - ["i2c.debug", true]
+
+  - ["spi.enable", true]
+  - ["spi.mosi_gpio", 26]
+  - ["spi.sclk_gpio", 25]
+  # - ["spi.cs0_gpio", 8] // rompe tutto?
+  - ["spi.debug", true]
+
+
+
+
+tags:
+  - js
+
+# List of files / directories with C sources. No slashes at the end of dir names.
+
+sources:
+  - src
+
+filesystem:
+  - fs
+
+libs:
+  - origin: https://github.com/mongoose-os-libs/js-demo-bundle
+  - origin: https://github.com/mongoose-os-libs/arduino-adafruit-ssd1306
+  # - name: clickEncoder
+  
+
+  - origin: https://github.com/mongoose-os-libs/ca-bundle
+  - origin: https://github.com/mongoose-os-libs/rpc-service-config
+  - origin: https://github.com/mongoose-os-libs/rpc-service-fs
+  - origin: https://github.com/mongoose-os-libs/rpc-uart
+  - origin: https://github.com/mongoose-os-libs/spi
+  - origin: https://github.com/mongoose-os-libs/vfs-dev-spi-flash
+
+
+
