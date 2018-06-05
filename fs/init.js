@@ -106,7 +106,7 @@ GPIO.set_mode(15, GPIO.MODE_OUTPUT);
 // }, null);
 
 let encInit = ffi("void encInit(int, int, int)");
-encInit(12, 14, 16); // a, btn, b
+encInit(14, 12, 16); // a, btn, b
 
 let getCount = ffi("int getCount()");
 
@@ -163,25 +163,92 @@ let lut = [
   "\x40\x00"
 ];
 
+let lut2 = [
+  "\x00\x00",
+  "\x00\x01",
+  "\x00\x02",
+  "\x00\x04",
+  "\x00\x08",
+  "\x00\x10",
+  "\x00\x20",
+  "\x00\x40",
+  "\x00\x80",
+  "\x01\x00",
+  "\x02\x00",
+  "\x04\x00",
+  "\x08\x00",
+  "\x10\x00",
+  "\x20\x00",
+  "\x40\x00"
+];
+
 let tick = 0;
+
+// Timer.set(
+//   200,
+//   Timer.REPEAT,
+//   function() {
+//     if (tick === 16) {
+//       tick = 0;
+//     }
+//     if (tick < 9) {
+//       spi_param.fd.tx_data = "\x00" + lut[tick];
+//       print(SPI.runTransaction(spi, spi_param));
+//       tick++;
+//     } else {
+//       spi_param.fd.tx_data = lut[tick];
+//       print(SPI.runTransaction(spi, spi_param));
+//       tick++;
+//     }
+//     // GPIO.toggle(11);
+//   },
+//   null
+// );
+
+// map helper
+let map = function(x, y, X, Y, input) {
+  let slope = (Y - X) / (y - x);
+  return 0 + slope * (input - 0);
+};
 
 Timer.set(
   200,
   Timer.REPEAT,
   function() {
-    if (tick === 16) {
-      tick = 0;
+    let ledPos = map(0, 16, 0, 16, getCount() / 4);
+    // print(ledPos);
+    // spi_param.fd.tx_data = lut2[ledPos];
+    spi_param.fd.tx_data = 0x8000;
+
+    SPI.runTransaction(spi, spi_param);
+    
+    let string = "paperino";
+    print(string.charCodeAt(0)); //works
+
+    // button detection
+    if (1) {
     }
-    if (tick < 9) {
-      spi_param.fd.tx_data = "\x00" + lut[tick];
-      print(SPI.runTransaction(spi, spi_param));
-      tick++;
-    } else {
-      spi_param.fd.tx_data = lut[tick];
-      print(SPI.runTransaction(spi, spi_param));
-      tick++;
+  },
+  null
+);
+
+//If the encoder switch is pushed, this will turn on the bottom LED.  The bottom LED is turned
+//   //on by 'OR-ing' the current display with 0x8000 (1000000000000000 in binary)
+//   if (!digitalRead(ENC_SW))
+//   {
+//     digitalWrite(LE,LOW);
+//     shiftOut(SDI,CLK,MSBFIRST,((sequence[sequenceNumber][scaledCounter]|0x8000) >> 8));
+//     shiftOut(SDI,CLK,MSBFIRST,sequence[sequenceNumber][scaledCounter]);
+//     digitalWrite(LE,HIGH);
+//   }
+
+Timer.set(
+  200,
+  Timer.REPEAT,
+  function() {
+    let btn;
+    if (btn) {
     }
-    // GPIO.toggle(11);
   },
   null
 );

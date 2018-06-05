@@ -1,4 +1,5 @@
 #include <mgos.h>
+#include "mgos_spi.h"
 #include "mgos_timers.h"
 #include "mgos_gpio.h"
 
@@ -98,15 +99,46 @@ void my_timer_cb(void *arg)
   // LOG(LL_INFO, ("Lut index is:\n%d <==(0B%s)", (state & 0x0f), int2bin((state & 0x0f), NULL)));
   volatile int8_t inc = enc_states[(state & 0x0f)];
   count += inc;
-  // if(inc) {
-  //   updateRing(count);
-  // }
+  if (inc)
+  {
+    // updateRing(count);
+  }
 
   // LOG(LL_INFO, ("LUT locked on:\n%d <==(0B%s)\n\n\n", enc_states[(state & 0x0f)], int2bin(enc_states[(state & 0x0f)], NULL)));
+}
+struct mgos_spi *spi;
+// spi = mgos_spi_get_global();
+spi = mgos_spi_create(spi);
+
+uint8_t tx_data[1] = {0x9f /* Read JEDEC ID */};
+
+struct mgos_spi_txn txn = {
+    .cs = 0, /* Use CS0 line as configured by cs0_gpio */
+    .mode = 0,
+    .freq = 10000000,
+};
+/* Half-duplex, command/response transaction setup */
+/* Transmit 1 byte from tx_data. */
+txn.hd.tx_len = 2;
+txn.hd.tx_data = 0x8000;
+/* No dummy bytes necessary. */
+txn.hd.dummy_len = 0;
+/* Receive 3 bytes into rx_data. */
+// txn.hd.rx_len = 3;
+// txn.hd.rx_data = rx_data;
+
+void spi_cb(void *arg)
+{
+  if (!mgos_spi_run_txn(spi, true, &txn))
+  {
+    LOG(LL_ERROR, ("SPI transaction failed"));
+    return;
+  }
 }
 
 enum mgos_app_init_result mgos_app_init(void)
 {
   mgos_set_hw_timer(1000, MGOS_TIMER_REPEAT, my_timer_cb, param);
+  mgos_set_timer(200, MGOS_TIMER_REPEAT, spi_cb, NULL);
   return MGOS_APP_INIT_SUCCESS;
 }
